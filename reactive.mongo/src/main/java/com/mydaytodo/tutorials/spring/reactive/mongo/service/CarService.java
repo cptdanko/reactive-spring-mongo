@@ -3,6 +3,8 @@ package com.mydaytodo.tutorials.spring.reactive.mongo.service;
 import com.mydaytodo.tutorials.spring.reactive.mongo.model.Car;
 import com.mydaytodo.tutorials.spring.reactive.mongo.repository.CarRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -11,7 +13,8 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class CarService {
 
-    private final CarRepository carRepository;
+    @Autowired
+    private CarRepository carRepository;
     public CarService(CarRepository carRepository) {
         this.carRepository = carRepository;
     }
