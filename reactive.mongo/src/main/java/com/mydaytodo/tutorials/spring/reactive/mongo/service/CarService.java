@@ -15,6 +15,9 @@ public class CarService {
 
     @Autowired
     private CarRepository carRepository;
+    private final Car TEST_CAR = Car.builder().name("BMW").build();
+    private final Car TEST_CAR_2 = Car.builder().name("MG").build();
+
     public CarService(CarRepository carRepository) {
         this.carRepository = carRepository;
     }
