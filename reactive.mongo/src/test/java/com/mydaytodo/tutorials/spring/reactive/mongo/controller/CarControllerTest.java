@@ -1,67 +1,70 @@
 package com.mydaytodo.tutorials.spring.reactive.mongo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mydaytodo.tutorials.spring.reactive.mongo.model.Car;
 import com.mydaytodo.tutorials.spring.reactive.mongo.service.CarService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
-@ExtendWith(MockitoExtension.class)
 @Slf4j
+@WebFluxTest(CarController.class)
 public class CarControllerTest {
     private MockMvc mockMvc;
 
-    JacksonTester<Car> carTester;
+    @Autowired
+    private WebTestClient webTestClient;
+    private static final String TEST_ID = "ISRD_1221";
+
+    @MockBean
+    private CarService carService;
     private final Car TEST_CAR = Car.builder().name("BMW").build();
     private final Car TEST_CAR_2 = Car.builder().name("MG").build();
-    @Mock
-    private CarService carService;
-    @InjectMocks
-    private CarController carController;
 
     @BeforeEach
     void setup() {
-        JacksonTester.initFields(this, new ObjectMapper());
-        mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-    }
-    @Test
-    void testGetCars() throws Exception {
-        String url = "/car";
-        when(carService.getAllCars()).thenReturn(Flux.just(TEST_CAR, TEST_CAR_2));
-        mockMvc.perform(get(url)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
     }
     @Test
     void testCreateCar() {
-
+        given(carService.create(any())).willReturn(Mono.just(TEST_CAR));
+        webTestClient.post().uri("/car")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(TEST_CAR)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Car.class).isEqualTo(TEST_CAR);
     }
     @Test
     void testGetCarById() {
-
+        given(carService.getCarById(any())).willReturn(Mono.just(TEST_CAR));
+        webTestClient.get().uri("/car/"+TEST_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Car.class).isEqualTo(TEST_CAR);
     }
     @Test
     void testDeleteCar() {
-
+        given(carService.getCarById(any())).willReturn(Mono.just(TEST_CAR));
+        webTestClient.delete().uri("/car/"+TEST_ID)
+                        .exchange()
+                    .expectStatus().isOk();
     }
     @Test
     void updateCar() {
-
+        given(carService.updateCar(any(), any())).willReturn(Mono.just(TEST_CAR));
+        webTestClient.put().uri("/car/"+TEST_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(TEST_CAR)
+                .exchange()
+                .expectStatus().isNoContent();
     }
 }

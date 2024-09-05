@@ -3,6 +3,7 @@ package com.mydaytodo.tutorials.spring.reactive.mongo.controller;
 import com.mydaytodo.tutorials.spring.reactive.mongo.model.Car;
 import com.mydaytodo.tutorials.spring.reactive.mongo.service.CarService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,6 +22,7 @@ public class CarController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<Car> createCar(@RequestBody Car car) {
         return carService.create(car);
     }
@@ -34,6 +36,7 @@ public class CarController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Car> updateCar(@PathVariable("id") String id, @RequestBody Car car) {
         return carService.updateCar(id, car);
     }
